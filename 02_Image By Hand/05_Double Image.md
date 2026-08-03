@@ -118,3 +118,20 @@ Range: 6 - 2 = 4
 
 Normalized: 0/4, 2/4, 4/4 = 0, 0.5, 1
 ```
+
+## Q&A
+
+### Does the normalized array sum to 1?
+
+No. Min-max normalization (`(x - min) / (max - min)`) only guarantees that the minimum value maps to 0 and the maximum value maps to 1 — it says nothing about the sum of all the values. For example, in the `2, 4, 6` example above, the normalized values are `0, 0.5, 1`, which sum to `1.5`, not 1.
+
+A normalized array summing to 1 is a different concept (e.g., a probability *distribution*, produced by dividing each value by the sum of all values, or by using something like softmax). Min-max normalization just rescales each value into the `[0, 1]` range independently — it does not redistribute values so they add up to 1.
+
+### How would normalization affect image processing with probability maps?
+
+A probability **map** assigns each pixel a value representing how likely that pixel belongs to some class or region (e.g., "probability this pixel is part of a tumor"), and each individual value is expected to fall within `[0, 1]`. Min-max normalization is exactly what makes this possible when the raw data doesn't already live in that range:
+
+- Raw scores from a model (e.g., a classifier's output, a distance measure, a filter response) can be arbitrarily large, small, or negative — not usable directly as per-pixel probabilities.
+- Applying `(x - min) / (max - min)` rescales every pixel's score into `[0, 1]`, so it can be interpreted and visualized as a probability-like value (0 = definitely not in class, 1 = definitely in class).
+- Because the scaling is proportional (Step 2 shift + Step 3 scale), the *relative* confidence between pixels is preserved — a pixel with a higher raw score still ends up with a higher normalized value.
+- However, since min-max normalization doesn't force the values to sum to 1 across the whole map, it produces per-pixel confidence scores in `[0, 1]`, not a true probability distribution over the image. If you need the map's values to sum to 1 (e.g., for sampling), you'd need a different normalization (like dividing by the sum, or softmax) instead of min-max.
