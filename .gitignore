@@ -1,0 +1,9 @@
+# Video files (downloaded lecture recordings — copyrighted, too large for GitHub)
+*.mp4
+*.mov
+*.mkv
+*.webm
+*.avi
+
+# OS files
+.DS_Store
